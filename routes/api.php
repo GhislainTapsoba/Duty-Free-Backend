@@ -2,112 +2,113 @@
 
 // routes/api.php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
-    AuthController,
-    UserController,
-    CategoryController,
-    SupplierController,
-    ProductController,
-    InventoryController,
-    InventoryItemController,
-    LotController,
-    CashRegisterController,
-    SaleController,
-    SaleItemController,
-    PurchaseOrderController,
-    PurchaseOrderItemController
+    AuthApiController,
+    UserApiController,
+    CategoryApiController,
+    SupplierApiController,
+    ProductApiController,
+    InventoryApiController,
+    InventoryItemApiController,
+    LotApiController,
+    CashRegisterApiController,
+    SaleApiController,
+    SaleItemApiController,
+    PurchaseOrderApiController,
+    PurchaseOrderItemApiController
 };
 
 // Routes d'authentification
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::post('refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
-    Route::get('profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+    Route::post('register', [AuthApiController::class, 'register']);
+    Route::post('login', [AuthApiController::class, 'login']);
+    Route::post('logout', [AuthApiController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('auth:sanctum');
+    Route::get('profile', [AuthApiController::class, 'profile'])->middleware('auth:sanctum');
 });
 
 // Routes protégées par authentification
 Route::middleware('auth:sanctum')->group(function () {
     
     // Users
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserApiController::class);
     
     // Categories
-    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('categories', CategoryApiController::class);
     
     // Suppliers
-    Route::apiResource('suppliers', SupplierController::class);
-    Route::get('suppliers/{supplier}/products', [SupplierController::class, 'products']);
+    Route::apiResource('suppliers', SupplierApiController::class);
+    Route::get('suppliers/{supplier}/products', [SupplierApiController::class, 'products']);
     
     // Products
-    Route::apiResource('products', ProductController::class);
-    Route::get('products/{product}/inventory', [ProductController::class, 'inventory']);
-    Route::get('products/category/{category}', [ProductController::class, 'byCategory']);
-    Route::get('products/supplier/{supplier}', [ProductController::class, 'bySupplier']);
+    Route::apiResource('products', ProductApiController::class);
+    Route::get('products/{product}/inventory', [ProductApiController::class, 'inventory']);
+    Route::get('products/category/{category}', [ProductApiController::class, 'byCategory']);
+    Route::get('products/supplier/{supplier}', [ProductApiController::class, 'bySupplier']);
     
     // Inventory
-    Route::apiResource('inventories', InventoryController::class);
-    Route::get('inventories/{inventory}/items', [InventoryController::class, 'items']);
+    Route::apiResource('inventories', InventoryApiController::class);
+    Route::get('inventories/{inventory}/items', [InventoryApiController::class, 'items']);
     
     // Inventory Items
-    Route::apiResource('inventory-items', InventoryItemController::class);
-    Route::post('inventory-items/{item}/adjust', [InventoryItemController::class, 'adjustQuantity']);
+    Route::apiResource('inventory-items', InventoryItemApiController::class);
+    Route::post('inventory-items/{item}/adjust', [InventoryItemApiController::class, 'adjustQuantity']);
     
     // Lots
-    Route::apiResource('lots', LotController::class);
-    Route::get('lots/expiring', [LotController::class, 'expiring']);
-    Route::get('lots/expired', [LotController::class, 'expired']);
+    Route::apiResource('lots', LotApiController::class);
+    Route::get('lots/expiring', [LotApiController::class, 'expiring']);
+    Route::get('lots/expired', [LotApiController::class, 'expired']);
     
     // Cash Registers
-    Route::apiResource('cash-registers', CashRegisterController::class);
-    Route::post('cash-registers/{register}/open', [CashRegisterController::class, 'open']);
-    Route::post('cash-registers/{register}/close', [CashRegisterController::class, 'close']);
-    Route::get('cash-registers/{register}/status', [CashRegisterController::class, 'status']);
+    Route::apiResource('cash-registers', CashRegisterApiController::class);
+    Route::post('cash-registers/{register}/open', [CashRegisterApiController::class, 'open']);
+    Route::post('cash-registers/{register}/close', [CashRegisterApiController::class, 'close']);
+    Route::get('cash-registers/{register}/status', [CashRegisterApiController::class, 'status']);
     
     // Sales
-    Route::apiResource('sales', SaleController::class);
-    Route::get('sales/{sale}/items', [SaleController::class, 'items']);
-    Route::post('sales/{sale}/complete', [SaleController::class, 'complete']);
-    Route::post('sales/{sale}/cancel', [SaleController::class, 'cancel']);
-    Route::get('sales/register/{register}', [SaleController::class, 'byRegister']);
-    Route::get('sales/user/{user}', [SaleController::class, 'byUser']);
+    Route::apiResource('sales', SaleApiController::class);
+    Route::get('sales/{sale}/items', [SaleApiController::class, 'items']);
+    Route::post('sales/{sale}/complete', [SaleApiController::class, 'complete']);
+    Route::post('sales/{sale}/cancel', [SaleApiController::class, 'cancel']);
+    Route::get('sales/register/{register}', [SaleApiController::class, 'byRegister']);
+    Route::get('sales/user/{user}', [SaleApiController::class, 'byUser']);
     
     // Sale Items
-    Route::apiResource('sale-items', SaleItemController::class);
-    Route::post('sale-items/{item}/update-quantity', [SaleItemController::class, 'updateQuantity']);
+    Route::apiResource('sale-items', SaleItemApiController::class);
+    Route::post('sale-items/{item}/update-quantity', [SaleItemApiController::class, 'updateQuantity']);
     
     // Purchase Orders
-    Route::apiResource('purchase-orders', PurchaseOrderController::class);
-    Route::get('purchase-orders/{order}/items', [PurchaseOrderController::class, 'items']);
-    Route::post('purchase-orders/{order}/submit', [PurchaseOrderController::class, 'submit']);
-    Route::post('purchase-orders/{order}/approve', [PurchaseOrderController::class, 'approve']);
-    Route::post('purchase-orders/{order}/receive', [PurchaseOrderController::class, 'receive']);
-    Route::post('purchase-orders/{order}/cancel', [PurchaseOrderController::class, 'cancel']);
-    Route::get('purchase-orders/supplier/{supplier}', [PurchaseOrderController::class, 'bySupplier']);
+    Route::apiResource('purchase-orders', PurchaseOrderApiController::class);
+    Route::get('purchase-orders/{order}/items', [PurchaseOrderApiController::class, 'items']);
+    Route::post('purchase-orders/{order}/submit', [PurchaseOrderApiController::class, 'submit']);
+    Route::post('purchase-orders/{order}/approve', [PurchaseOrderApiController::class, 'approve']);
+    Route::post('purchase-orders/{order}/receive', [PurchaseOrderApiController::class, 'receive']);
+    Route::post('purchase-orders/{order}/cancel', [PurchaseOrderApiController::class, 'cancel']);
+    Route::get('purchase-orders/supplier/{supplier}', [PurchaseOrderApiController::class, 'bySupplier']);
     
     // Purchase Order Items
-    Route::apiResource('purchase-order-items', PurchaseOrderItemController::class);
-    Route::post('purchase-order-items/{item}/update-quantity', [PurchaseOrderItemController::class, 'updateQuantity']);
+    Route::apiResource('purchase-order-items', PurchaseOrderItemApiController::class);
+    Route::post('purchase-order-items/{item}/update-quantity', [PurchaseOrderItemApiController::class, 'updateQuantity']);
     
     // Routes de reporting et statistiques
     Route::prefix('reports')->group(function () {
-        Route::get('sales/daily', [SaleController::class, 'dailyReport']);
-        Route::get('sales/monthly', [SaleController::class, 'monthlyReport']);
-        Route::get('inventory/low-stock', [InventoryItemController::class, 'lowStock']);
-        Route::get('inventory/valuation', [InventoryItemController::class, 'valuation']);
-        Route::get('products/best-sellers', [ProductController::class, 'bestSellers']);
+        Route::get('sales/daily', [SaleApiController::class, 'dailyReport']);
+        Route::get('sales/monthly', [SaleApiController::class, 'monthlyReport']);
+        Route::get('inventory/low-stock', [InventoryItemApiController::class, 'lowStock']);
+        Route::get('inventory/valuation', [InventoryItemApiController::class, 'valuation']);
+        Route::get('products/best-sellers', [ProductApiController::class, 'bestSellers']);
     });
     
     // Routes de recherche
     Route::prefix('search')->group(function () {
-        Route::get('products', [ProductController::class, 'search']);
-        Route::get('sales', [SaleController::class, 'search']);
-        Route::get('purchase-orders', [PurchaseOrderController::class, 'search']);
-        Route::get('suppliers', [SupplierController::class, 'search']);
+        Route::get('products', [ProductApiController::class, 'search']);
+        Route::get('sales', [SaleApiController::class, 'search']);
+        Route::get('purchase-orders', [PurchaseOrderApiController::class, 'search']);
+        Route::get('suppliers', [SupplierApiController::class, 'search']);
     });
 });
 
 // Routes publiques (si nécessaire)
-Route::get('categories/public', [CategoryController::class, 'publicIndex']);
-Route::get('products/public', [ProductController::class, 'publicIndex']);
+Route::get('categories/public', [CategoryApiController::class, 'publicIndex']);
+Route::get('products/public', [ProductApiController::class, 'publicIndex']);
