@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * Sale Model
+ */
 class Sale extends Model
 {
     use HasFactory;
@@ -27,7 +31,7 @@ class Sale extends Model
         'status',
         'is_synced',
         'sale_date',
-        'notes',
+        'notes'
     ];
 
     protected $casts = [
@@ -36,7 +40,7 @@ class Sale extends Model
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'is_synced' => 'boolean',
-        'sale_date' => 'datetime',
+        'sale_date' => 'timestamp',
     ];
 
     // Relations
@@ -63,69 +67,5 @@ class Sale extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
-    }
-
-    // Scopes
-    public function scopeCompleted($query)
-    {
-        return $query->where('status', 'completed');
-    }
-
-    public function scopeToday($query)
-    {
-        return $query->whereDate('sale_date', today());
-    }
-
-    public function scopeThisMonth($query)
-    {
-        return $query->whereMonth('sale_date', now()->month)
-                    ->whereYear('sale_date', now()->year);
-    }
-
-    public function scopeByCashier($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    // Accessors
-    public function getFormattedTotalAttribute()
-    {
-        return number_format($this->total_amount, 0, ',', ' ') . ' ' . $this->currency;
-    }
-
-    public function getItemsCountAttribute()
-    {
-        return $this->saleItems->sum('quantity');
-    }
-
-    // Methods
-    public function generateSaleNumber()
-    {
-        $date = now()->format('Ymd');
-        $lastSale = static::whereDate('created_at', today())->latest()->first();
-        $sequence = $lastSale ? intval(substr($lastSale->sale_number, -4)) + 1 : 1;
-        
-        return 'VT' . $date . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-    }
-
-    public function generateReceiptNumber()
-    {
-        $date = now()->format('Ymd');
-        $lastReceipt = static::whereDate('created_at', today())->latest()->first();
-        $sequence = $lastReceipt ? intval(substr($lastReceipt->receipt_number, -4)) + 1 : 1;
-        
-        return 'RCT' . $date . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-    }
-
-    public function calculateTotals()
-    {
-        $this->subtotal = $this->saleItems->sum(function ($item) {
-            return $item->quantity * $item->unit_price;
-        });
-
-        $this->tax_amount = $this->saleItems->sum('tax_amount');
-        $this->total_amount = $this->subtotal + $this->tax_amount - $this->discount_amount;
-        
-        $this->save();
     }
 }

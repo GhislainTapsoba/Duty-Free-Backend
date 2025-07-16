@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * Product Model
+ */
 class Product extends Model
 {
     use HasFactory;
@@ -33,7 +37,7 @@ class Product extends Model
         'is_active',
         'is_trackable',
         'storage_location',
-        'expiry_date',
+        'expiry_date'
     ];
 
     protected $casts = [
@@ -80,60 +84,8 @@ class Product extends Model
         return $this->hasMany(InventoryItem::class);
     }
 
-    // Scopes
-    public function scopeActive($query)
+    public function lots()
     {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeLowStock($query)
-    {
-        return $query->whereColumn('stock_quantity', '<=', 'minimum_stock');
-    }
-
-    public function scopeByCategory($query, $categoryId)
-    {
-        return $query->where('category_id', $categoryId);
-    }
-
-    // Accessors
-    public function getFormattedPriceAttribute()
-    {
-        return number_format($this->selling_price_xof, 0, ',', ' ') . ' FCFA';
-    }
-
-    public function getIsLowStockAttribute()
-    {
-        return $this->stock_quantity <= $this->minimum_stock;
-    }
-
-    public function getSellingPriceAttribute()
-    {
-        return $this->selling_price_xof;
-    }
-
-    // Mutators
-    public function setCodeAttribute($value)
-    {
-        $this->attributes['code'] = strtoupper($value);
-    }
-
-    // Methods
-    public function getSellingPriceByCurrency($currency = 'XOF')
-    {
-        return match($currency) {
-            'EUR' => $this->selling_price_eur,
-            'USD' => $this->selling_price_usd,
-            default => $this->selling_price_xof,
-        };
-    }
-
-    public function updateStock($quantity, $type = 'out')
-    {
-        if ($type === 'out') {
-            $this->decrement('stock_quantity', $quantity);
-        } else {
-            $this->increment('stock_quantity', $quantity);
-        }
+        return $this->hasMany(Lot::class);
     }
 }

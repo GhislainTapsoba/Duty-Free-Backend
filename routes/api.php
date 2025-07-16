@@ -1,12 +1,11 @@
 <?php
 
-// routes/api.php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     AuthApiController,
     UserApiController,
     CategoryApiController,
+    DashboardApiController,
     SupplierApiController,
     ProductApiController,
     InventoryApiController,
@@ -16,24 +15,35 @@ use App\Http\Controllers\Api\{
     SaleApiController,
     SaleItemApiController,
     PurchaseOrderApiController,
-    PurchaseOrderItemApiController
+    PurchaseOrderItemApiController,
+    PromotionApiController,
+    PasswordResetApiController
 };
 
 // Routes d'authentification
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthApiController::class, 'register']);
     Route::post('login', [AuthApiController::class, 'login']);
-    Route::post('logout', [AuthApiController::class, 'logout'])->middleware('auth:sanctum');
-    Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('auth:sanctum');
-    Route::get('profile', [AuthApiController::class, 'profile'])->middleware('auth:sanctum');
+    // Change ici le middleware auth:sanctum en auth:api
+    Route::post('logout', [AuthApiController::class, 'logout'])->middleware('auth:api');
+    Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('auth:api');
+    Route::get('profile', [AuthApiController::class, 'profile'])->middleware('auth:api');
 });
 
-// Routes protégées par authentification
-Route::middleware('auth:sanctum')->group(function () {
+// Routes protégées par authentification token
+Route::middleware('auth:api')->group(function () {
     
     // Users
     Route::apiResource('users', UserApiController::class);
-    
+    Route::post('users/{user}/reset-password', [UserApiController::class, 'resetPassword']);
+
+    // Dashboard
+    Route::prefix('dashboard')->group(function () {
+        Route::get('summary', [DashboardApiController::class, 'summary']);
+        Route::get('sales-report', [DashboardApiController::class, 'salesReport']);
+        Route::get('stock-report', [DashboardApiController::class, 'stockReport']);
+    });
+
     // Categories
     Route::apiResource('categories', CategoryApiController::class);
     
@@ -89,7 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Purchase Order Items
     Route::apiResource('purchase-order-items', PurchaseOrderItemApiController::class);
-    Route::post('purchase-order-items/{item}/update-quantity', [PurchaseOrderItemApiController::class, 'updateQuantity']);
+    Route::post('purchase-order-items/{item}/update-quantity', [PurchaseOrderApiController::class, 'updateQuantity']);
     
     // Routes de reporting et statistiques
     Route::prefix('reports')->group(function () {
@@ -107,8 +117,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('purchase-orders', [PurchaseOrderApiController::class, 'search']);
         Route::get('suppliers', [SupplierApiController::class, 'search']);
     });
+
+    // Promotions
+    Route::apiResource('promotions', PromotionApiController::class);
+    Route::post('promotions/{promotion}/activate', [PromotionApiController::class, 'activate']);
+    Route::post('promotions/{promotion}/deactivate', [PromotionApiController::class, 'deactivate']);
+    Route::get('promotions-active', [PromotionApiController::class, 'active']);
+
 });
 
 // Routes publiques (si nécessaire)
 Route::get('categories/public', [CategoryApiController::class, 'publicIndex']);
 Route::get('products/public', [ProductApiController::class, 'publicIndex']);
+
+// Route fallback 404 (optionnel)
+Route::fallback(function () {
+    return response()->json(['message' => 'Route non trouvée.'], 404);
+});
+
+// Réinitialisation du mot de passe
+Route::post('/auth/forgot-password', [AuthApiController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthApiController::class, 'resetPassword']);
+
+// Routes pour la réinitialisation de mot de passe
+Route::post('/auth/forgot-password', [PasswordResetApiController::class, 'forgot']);
+Route::post('/auth/reset-password', [PasswordResetApiController::class, 'reset']);

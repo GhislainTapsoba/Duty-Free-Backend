@@ -21,7 +21,19 @@ return new class extends Migration
             $table->decimal('current_balance', 10, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_sync_at')->nullable();
+
+            // Colonnes supplémentaires pour gestion des ouvertures/fermetures
+            $table->boolean('is_open')->default(false);
+            $table->unsignedBigInteger('opened_by')->nullable();
+            $table->timestamp('opened_at')->nullable();
+            $table->unsignedBigInteger('closed_by')->nullable();
+            $table->timestamp('closed_at')->nullable();
+
             $table->timestamps();
+
+            // Foreign keys si nécessaire (optionnel selon ta logique)
+            $table->foreign('opened_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('closed_by')->references('id')->on('users')->nullOnDelete();
         });
     }
 

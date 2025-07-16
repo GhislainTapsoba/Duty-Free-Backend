@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
+
+/**
+ * User Model
+ */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -20,6 +25,7 @@ class User extends Authenticatable
         'employee_code',
         'is_active',
         'last_login_at',
+        'permissions'
     ];
 
     protected $hidden = [
@@ -28,20 +34,16 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'last_login_at' => 'datetime',
+        'email_verified_at' => 'timestamp',
+        'last_login_at' => 'timestamp',
         'is_active' => 'boolean',
+        'permissions' => 'array',
     ];
 
     // Relations
     public function sales()
     {
         return $this->hasMany(Sale::class);
-    }
-
-    public function stockMovements()
-    {
-        return $this->hasMany(StockMovement::class);
     }
 
     public function purchaseOrders()
@@ -54,25 +56,23 @@ class User extends Authenticatable
         return $this->hasMany(Inventory::class);
     }
 
-    // Scopes
-    public function scopeActive($query)
+    public function stockMovements()
     {
-        return $query->where('is_active', true);
+        return $this->hasMany(StockMovement::class);
     }
 
-    public function scopeByRole($query, $role)
+    public function openedCashRegisters()
     {
-        return $query->where('role', $role);
+        return $this->hasMany(CashRegister::class, 'opened_by');
     }
 
-    // Accessors
-    public function getIsAdminAttribute()
+    public function closedCashRegisters()
     {
-        return $this->role === 'admin';
+        return $this->hasMany(CashRegister::class, 'closed_by');
     }
 
-    public function getIsCashierAttribute()
+    public function externalData()
     {
-        return $this->role === 'caissier';
+        return $this->hasMany(ExternalData::class);
     }
 }

@@ -5,7 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// Supplier Model
+
+/**
+ * Supplier Model
+ */
+/**
+ * Supplier Model
+ */
 class Supplier extends Model
 {
     use HasFactory;
@@ -21,13 +27,14 @@ class Supplier extends Model
         'tax_number',
         'contact_person',
         'payment_terms',
-        'is_active',
+        'is_active'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
 
+    // Relations
     public function products()
     {
         return $this->hasMany(Product::class);
@@ -36,15 +43,5 @@ class Supplier extends Model
     public function purchaseOrders()
     {
         return $this->hasMany(PurchaseOrder::class);
-    }
-
-    public function lots()
-    {
-        return $this->hasMany(Lot::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
     }
 }
