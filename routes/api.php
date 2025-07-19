@@ -11,27 +11,43 @@ use App\Http\Controllers\Api\{
     InventoryApiController,
     InventoryItemApiController,
     LotApiController,
+    InventoryAdjustmentApiController,
     CashRegisterApiController,
     SaleApiController,
     SaleItemApiController,
     PurchaseOrderApiController,
     PurchaseOrderItemApiController,
     PromotionApiController,
-    PasswordResetApiController
+    PasswordResetApiController,
+    ProductReturnApiController,
+    ReturnItemApiController,
+    SystemSettingApiController,
+    ReportApiController,
+    PosApiController,
+    AlertApiController
+    
 };
 
 // Routes d'authentification
-Route::prefix('auth')->group(function () {
+Route::middleware('web')->prefix('auth')->group(function () {
     Route::post('register', [AuthApiController::class, 'register']);
     Route::post('login', [AuthApiController::class, 'login']);
-    // Change ici le middleware auth:sanctum en auth:api
-    Route::post('logout', [AuthApiController::class, 'logout'])->middleware('auth:api');
-    Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('auth:api');
-    Route::get('profile', [AuthApiController::class, 'profile'])->middleware('auth:api');
+    Route::post('logout', [AuthApiController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('refresh', [AuthApiController::class, 'refresh'])->middleware('auth:sanctum');
+    Route::get('profile', [AuthApiController::class, 'profile'])->middleware('auth:sanctum');
+    Route::post('forgot-password', [AuthApiController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthApiController::class, 'resetPassword']);
+    Route::get('csrf-token', function () {
+        return response()->json(['csrf_token' => csrf_token()]);
+    })->middleware('web'); // CSRF Token pour Sanctum (SPA)
+    // Password Reset
+    Route::post('/auth/forgot-password', [PasswordResetApiController::class, 'forgotPassword']);
+    Route::post('/auth/reset-password', [PasswordResetApiController::class, 'resetPassword']);
 });
 
-// Routes protégées par authentification token
-Route::middleware('auth:api')->group(function () {
+
+// Routes protégées par authentification Sanctum
+Route::middleware('auth:sanctum')->group(function () {
     
     // Users
     Route::apiResource('users', UserApiController::class);
@@ -51,6 +67,9 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('suppliers', SupplierApiController::class);
     Route::get('suppliers/{supplier}/products', [SupplierApiController::class, 'products']);
     
+    // Adjustments
+    Route::apiResource('inventory-adjustments', InventoryAdjustmentApiController::class);
+
     // Products
     Route::apiResource('products', ProductApiController::class);
     Route::get('products/{product}/inventory', [ProductApiController::class, 'inventory']);
@@ -88,6 +107,15 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('sale-items', SaleItemApiController::class);
     Route::post('sale-items/{item}/update-quantity', [SaleItemApiController::class, 'updateQuantity']);
     
+     Route::get('/pos', [PosApiController::class, 'index']);
+
+    // Alertes
+    Route::get('/alerts', [AlertApiController::class, 'index']);
+    // Si besoin d'autres méthodes, tu peux ajouter store, update, delete, etc.
+
+    // Rapports
+    Route::get('/reports', [ReportApiController::class, 'index']);
+
     // Purchase Orders
     Route::apiResource('purchase-orders', PurchaseOrderApiController::class);
     Route::get('purchase-orders/{order}/items', [PurchaseOrderApiController::class, 'items']);
@@ -124,21 +152,37 @@ Route::middleware('auth:api')->group(function () {
     Route::post('promotions/{promotion}/deactivate', [PromotionApiController::class, 'deactivate']);
     Route::get('promotions-active', [PromotionApiController::class, 'active']);
 
+
+    // Returns
+    Route::get('returns/{id}', [ProductReturnApiController::class, 'show']);
+    Route::apiResource('returns', ProductReturnApiController::class);
+    Route::get('returns/{return}/items', [ProductReturnApiController::class, 'items']);
+    Route::post('returns/{return}/process', [ProductReturnApiController::class, 'processReturn']);
+    Route::post('returns/{return}/cancel', [ProductReturnApiController::class, 'cancelReturn']);
+    Route::get('returns/user/{user}', [ProductReturnApiController::class, 'byUser']);
+    Route::get('returns/status/{status}', [ProductReturnApiController::class, 'byStatus']);
+    Route::apiResource('return-items', ReturnItemApiController::class);
+    Route::get('return-items/{item}/product', [ReturnItemApiController::class, 'product']);
+    Route::get('return-items/{item}/product-return', [ReturnItemApiController::class, 'productReturn']);
+    Route::post('return-items/{item}/update-quantity', [ReturnItemApiController::class, 'updateQuantity']);
+    Route::post('return-items/{item}/update-refund', [ReturnItemApiController::class, 'updateRefundAmount']);
+
+    // Settings
+    Route::get('settings', [SystemSettingApiController::class, 'index']);
+    Route::put('settings', [SystemSettingApiController::class, 'update']);
+    // CSRF Token pour Sanctum (SPA)
+
 });
 
 // Routes publiques (si nécessaire)
 Route::get('categories/public', [CategoryApiController::class, 'publicIndex']);
 Route::get('products/public', [ProductApiController::class, 'publicIndex']);
 
-// Route fallback 404 (optionnel)
-Route::fallback(function () {
-    return response()->json(['message' => 'Route non trouvée.'], 404);
-});
-
-// Réinitialisation du mot de passe
+// Réinitialisation du mot de passe (routes publiques)
 Route::post('/auth/forgot-password', [AuthApiController::class, 'forgotPassword']);
 Route::post('/auth/reset-password', [AuthApiController::class, 'resetPassword']);
 
-// Routes pour la réinitialisation de mot de passe
-Route::post('/auth/forgot-password', [PasswordResetApiController::class, 'forgot']);
-Route::post('/auth/reset-password', [PasswordResetApiController::class, 'reset']);
+// Route fallback 404
+Route::fallback(function () {
+    return response()->json(['message' => 'Route non trouvée.'], 404);
+});

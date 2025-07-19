@@ -7,6 +7,7 @@ use App\Models\CashRegister;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class CashRegisterApiController extends Controller
 {
@@ -24,15 +25,17 @@ class CashRegisterApiController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:cash_registers,code',
+            'code' => 'nullable|string|unique:cash_registers,code',
             'location' => 'required|string|max:255',
             'ip_address' => 'nullable|ip',
             'opening_balance' => 'required|numeric|min:0',
         ]);
-        
+
+        $code = $request->code ?? 'CR-' . strtoupper(Str::random(8));
+
         $cashRegister = CashRegister::create([
             'name' => $request->name,
-            'code' => $request->code,
+            'code' => $code,
             'location' => $request->location,
             'ip_address' => $request->ip_address,
             'opening_balance' => $request->opening_balance,
@@ -43,14 +46,14 @@ class CashRegisterApiController extends Controller
             'scanner_config' => $request->scanner_config ?? [],
             'tpe_config' => $request->tpe_config ?? [],
         ]);
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'Caisse créée avec succès',
             'data' => $cashRegister
         ], 201);
     }
-    
+
     public function show(CashRegister $cashRegister): JsonResponse
     {
         $cashRegister->load(['sales', 'openedBy', 'closedBy']);

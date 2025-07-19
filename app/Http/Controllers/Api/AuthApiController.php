@@ -18,7 +18,7 @@ class AuthApiController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
-            'role' => ['required', 'in:admin,cashier,supervisor,stock_manager'], // ✅ Aligné avec le frontend
+            'role' => ['required', 'in:admin,caissier,superviseur,stock_manager'], // ✅ Aligné avec le frontend
             'phone' => 'nullable|string|max:20', // ✅ Ajouté
         ]);
 

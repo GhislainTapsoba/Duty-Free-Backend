@@ -76,7 +76,10 @@ class ReportApiController extends Controller
             ->get();
 
         $totalValue = $products->sum(fn($product) => $product->stock_quantity * $product->purchase_price);
-        $lowStockCount = $products->where('stock_quantity', '<=', 'minimum_stock')->count();
+
+        // Utiliser filter pour comparer deux attributs du modèle
+        $lowStockCount = $products->filter(fn($product) => $product->stock_quantity <= $product->minimum_stock)->count();
+
         $outOfStockCount = $products->where('stock_quantity', 0)->count();
 
         return response()->json([
@@ -86,4 +89,5 @@ class ReportApiController extends Controller
             'outOfStockCount' => $outOfStockCount
         ]);
     }
+
 }

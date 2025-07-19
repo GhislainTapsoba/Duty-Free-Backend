@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// ✅ Ajoute ceci pour forcer la présence de la route CSRF de Sanctum
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['csrf_token_set' => true]);
+});

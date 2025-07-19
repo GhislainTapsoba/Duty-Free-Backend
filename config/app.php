@@ -183,6 +183,23 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Cache' => Illuminate\Support\Facades\Cache::class,
+        'Config' => Illuminate\Support\Facades\Config::class,
+        'DB' => Illuminate\Support\Facades\DB::class,
+        'Log' => Illuminate\Support\Facades\Log::class,
+        'Route' => Illuminate\Support\Facades\Route::class,
+        'Request' => Illuminate\Support\Facades\Request::class,
+        'Response' => Illuminate\Support\Facades\Response::class,
+        'Validator' => Illuminate\Support\Facades\Validator::class,
+        'Auth' => Illuminate\Support\Facades\Auth::class,
+        'Str' => Illuminate\Support\Str::class,
+        'Hash' => Illuminate\Support\Facades\Hash::class,
+        'Session' => Illuminate\Support\Facades\Session::class,
+        'URL' => Illuminate\Support\Facades\URL::class,
+        'View' => Illuminate\Support\Facades\View::class,
+        'File' => Illuminate\Support\Facades\File::class,
+        'Storage' => Illuminate\Support\Facades\Storage::class,
     ])->toArray(),
 
 ];
